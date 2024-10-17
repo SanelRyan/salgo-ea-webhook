@@ -1,0 +1,16 @@
+{
+  "name": "salgobacktest",
+  "version": "1.0.0",
+  "description": "Backtesting Demo Server",
+  "main": "webhook.js",
+  "scripts": {
+    "start": "node webhook.js"
+  },
+  "author": "Sanel Ryan",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.21.1",
+    "ngrok": "^5.0.0-beta.2"
+  }
+}
