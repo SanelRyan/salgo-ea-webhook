@@ -1,7 +1,7 @@
 {
-  "name": "salgobacktest",
+  "name": "salgo-ea-webhook",
   "version": "1.0.0",
-  "description": "Backtesting Demo Server",
+  "description": "Salgo EA Webhook",
   "main": "webhook.js",
   "scripts": {
     "start": "node webhook.js"
@@ -11,6 +11,7 @@
   "dependencies": {
     "body-parser": "^1.20.3",
     "express": "^4.21.1",
-    "ngrok": "^5.0.0-beta.2"
+    "ngrok": "^5.0.0-beta.2",
+    "ws": "^8.18.0"
   }
 }
