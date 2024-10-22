@@ -7,7 +7,7 @@
     "start": "node webhook.js"
   },
   "author": "Sanel Ryan",
-  "license": "UNLICENSED",
+  "license": "BSD 2-Clause License",
   "dependencies": {
     "body-parser": "^1.20.3",
     "chalk": "^5.3.0",
