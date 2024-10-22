@@ -1,45 +1,100 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const ngrok = require("ngrok");
-const { WebSocketServer } = require("ws");
+import express from "express";
+import bodyParser from "body-parser";
+import ngrok from "ngrok";
+import { WebSocketServer } from "ws";
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
 
-// Initialize Express and WebSocketServer
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const logFilePath = path.join(__dirname, "webhook_logs.json");
+
 const app = express();
 const wss = new WebSocketServer({ port: 8080 });
-
-// Use body-parser middleware to parse JSON requests
 app.use(bodyParser.json());
 
-// WebSocket connection handling
+const colors = {
+	timestamp: chalk.blue,
+	action: chalk.green,
+	position: chalk.yellow,
+	price: chalk.magenta,
+	symbol: chalk.cyan,
+	success: chalk.greenBright,
+	error: chalk.red,
+	info: chalk.white,
+};
+
+// Improved logRequest function
+const logRequest = (data) => {
+	const timestamp = new Date().toISOString();
+	const logEntry = {
+		timestamp,
+		action: data.action,
+		position: data.position,
+		price: data.price,
+		symbol: data.symbol,
+	};
+
+	// Append JSON log entry to the file
+	fs.appendFileSync(logFilePath, JSON.stringify(logEntry) + ",\n", { flag: "a" });
+};
+
 wss.on("connection", (ws) => {
-	console.log("🔌 WebSocket client connected");
+	console.log(colors.info("🤝 WebSocket client connected"));
+
+	const pingInterval = setInterval(() => {
+		if (ws.readyState === ws.OPEN) {
+			ws.ping();
+		}
+	}, 30000);
 
 	ws.on("close", () => {
-		console.log("❌ WebSocket client disconnected");
+		clearInterval(pingInterval);
+		console.log(colors.info("👋 WebSocket client disconnected"));
+	});
+
+	ws.on("pong", () => {
+		// Nice
 	});
 });
 
-// Webhook endpoint to receive TradingView alerts
 app.post("/webhook", (req, res) => {
-	const alertData = req.body;
-	console.log(`🚀 Webhook received:`, alertData);
+	try {
+		const alertData = req.body;
+		logRequest(alertData);
 
-	// Broadcast the data to all connected WebSocket clients (e.g., EA)
-	wss.clients.forEach((client) => {
-		if (client.readyState === client.OPEN) {
-			client.send(JSON.stringify(alertData)); // Forward the alert data to EA
-		}
-	});
+		wss.clients.forEach((client) => {
+			if (client.readyState === client.OPEN) {
+				client.send(JSON.stringify(alertData));
+			}
+		});
 
-	res.status(200).send("✅ Webhook received successfully!");
+		res.status(200).send(colors.success("✅ Webhook received successfully!"));
+		console.log(colors.success("✅ Webhook received successfully!"));
+	} catch (error) {
+		console.error(colors.error("❌ Error handling webhook:", error));
+		res.status(500).send(colors.error("🛑 Error processing webhook"));
+	}
 });
 
-// Start Express server and Ngrok tunnel
 const port = 80;
 app.listen(port, async () => {
-	console.log(`🌐 Webhook server is listening on port ${port}...`);
+	console.log(colors.info(`🚀 Webhook server is listening on port ${port}...`));
 
-	const url = await ngrok.connect(port);
-	console.log(`🔗 Ngrok tunnel set up at: ${url}`);
-	console.log(`📬 Send TradingView webhooks to: ${url}/webhook`);
+	try {
+		const url = await ngrok.connect(port);
+		console.log(colors.info(`🌉 Ngrok tunnel set up at: ${url}`));
+
+		// Construct and log the WebSocket URL
+		const wsUrl = `ws://${url.split("://")[1]}:8080`; // Use ws for WebSocket
+		console.log(colors.info(`🌐 WebSocket server is available at: ${wsUrl}`)); // Log the WebSocket URL
+
+		console.log(colors.info(`📬 Send TradingView webhooks to: ${url}/webhook`));
+	} catch (error) {
+		console.error(colors.error("❌ Error starting Ngrok:", error));
+	}
 });
