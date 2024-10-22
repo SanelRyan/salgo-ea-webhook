@@ -1,9 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
-import ngrok from "ngrok";
 import { WebSocketServer } from "ws";
-import fs from "fs";
 import chalk from "chalk";
+import os from "os";
 
 const app = express();
 const wss = new WebSocketServer({ port: 8080 });
@@ -63,20 +62,28 @@ app.post("/webhook", (req, res) => {
 	}
 });
 
+// Function to get the public IPv6 address
+const getPublicIPv6 = () => {
+	const interfaces = os.networkInterfaces();
+	for (const name of Object.keys(interfaces)) {
+		for (const iface of interfaces[name]) {
+			if (iface.family === "IPv6" && !iface.internal) {
+				return iface.address;
+			}
+		}
+	}
+	return null;
+};
+
 const port = 80;
-app.listen(port, async () => {
+app.listen(port, () => {
 	console.log(colors.info(`🚀 Webhook server is listening on port ${port}...`));
 
-	try {
-		const url = await ngrok.connect(port);
-		console.log(colors.info(`🌉 Ngrok tunnel set up at: ${url}`));
-
-		// Construct and log the WebSocket URL
-		const wsUrl = `ws://${url.split("://")[1]}:8080`; // Use ws for WebSocket
-		console.log(colors.info(`🌐 WebSocket server is available at: ${wsUrl}`)); // Log the WebSocket URL
-
-		console.log(colors.info(`📬 Send TradingView webhooks to: ${url}/webhook`));
-	} catch (error) {
-		console.error(colors.error("❌ Error starting Ngrok:", error));
+	const ipv6 = getPublicIPv6();
+	if (ipv6) {
+		console.log(colors.info(`🌐 Server is accessible at: http://[${ipv6}]:${port}`));
+		console.log(colors.info(`🌐 WebSocket server is available at: ws://[${ipv6}]:8080`));
+	} else {
+		console.log(colors.error("❌ No public IPv6 address found"));
 	}
 });
