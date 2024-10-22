@@ -5,7 +5,6 @@ import chalk from "chalk";
 import os from "os";
 import dotenv from "dotenv";
 
-// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
@@ -51,13 +50,11 @@ app.post("/webhook", (req, res) => {
 	try {
 		const alertData = req.body;
 
-		// Check if alertData contains a SEC_ID and if it matches the .env SEC_ID
 		if (!alertData.SEC_ID || alertData.SEC_ID !== process.env.SEC_ID) {
 			console.log(colors.error("❌ Invalid or missing SEC_ID"));
 			return res.status(403).send(colors.error("🛑 Forbidden: Invalid SEC_ID"));
 		}
 
-		// Log and forward the request if SEC_ID matches
 		logRequest(alertData);
 
 		wss.clients.forEach((client) => {
@@ -74,7 +71,6 @@ app.post("/webhook", (req, res) => {
 	}
 });
 
-// Function to get the public IPv4 address
 const getPublicIPv4 = () => {
 	const interfaces = os.networkInterfaces();
 	for (const name of Object.keys(interfaces)) {
