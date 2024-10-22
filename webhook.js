@@ -3,15 +3,7 @@ import bodyParser from "body-parser";
 import ngrok from "ngrok";
 import { WebSocketServer } from "ws";
 import fs from "fs";
-import path from "path";
 import chalk from "chalk";
-
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const logFilePath = path.join(__dirname, "webhook_logs.json");
 
 const app = express();
 const wss = new WebSocketServer({ port: 8080 });
@@ -30,17 +22,7 @@ const colors = {
 
 // Improved logRequest function
 const logRequest = (data) => {
-	const timestamp = new Date().toISOString();
-	const logEntry = {
-		timestamp,
-		action: data.action,
-		position: data.position,
-		price: data.price,
-		symbol: data.symbol,
-	};
-
-	// Append JSON log entry to the file
-	fs.appendFileSync(logFilePath, JSON.stringify(logEntry) + ",\n", { flag: "a" });
+	console.log(JSON.stringify(logEntry));
 };
 
 wss.on("connection", (ws) => {
