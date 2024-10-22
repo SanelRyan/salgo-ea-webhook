@@ -75,7 +75,7 @@ const getPublicIPv6 = () => {
 	return null;
 };
 
-const port = 80;
+const port = 8080;
 app.listen(port, () => {
 	console.log(colors.info(`🚀 Webhook server is listening on port ${port}...`));
 
