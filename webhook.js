@@ -82,7 +82,7 @@ app.listen(port, () => {
 	const ipv6 = getPublicIPv6();
 	if (ipv6) {
 		console.log(colors.info(`🌐 Server is accessible at: http://[${ipv6}]:${port}`));
-		console.log(colors.info(`🌐 WebSocket server is available at: ws://[${ipv6}]:${port}`));
+		console.log(colors.info(`🌐 WebSocket server is available at: ws://[${ipv6}]:8080`));
 	} else {
 		console.log(colors.error("❌ No public IPv6 address found"));
 	}
