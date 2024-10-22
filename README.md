@@ -1,6 +1,6 @@
 # Webhook Server for TradingView Alerts
 
-This project provides a webhook server that handles real-time TradingView alerts. It forwards incoming webhook data via WebSockets to connected clients and logs the alert information for future reference.
+A webhook server that handles real-time TradingView alerts. It forwards incoming webhook data via WebSockets to connected clients and logs the alert information for future reference.
 
 ## Features
 
