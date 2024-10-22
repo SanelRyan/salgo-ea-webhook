@@ -1,22 +1,26 @@
 # Webhook Server for TradingView Alerts
 
-This provides a webhook server to handle real-time TradingView alerts. It forwards incoming webhook data via WebSockets to connected clients and logs the alert information for future reference. The server also sets up an ngrok tunnel to expose the server to the internet, making it easier to receive webhooks from TradingView.
+This project provides a webhook server that handles real-time TradingView alerts. It forwards incoming webhook data via WebSockets to connected clients and logs the alert information for future reference.
 
 ## Features
 
--   Accepts TradingView webhooks and logs the alert data to a file.
+-   Accepts TradingView webhooks and logs alert data.
 -   Broadcasts webhook data to all connected WebSocket clients.
--   Uses `ngrok` to expose the server for external access.
 -   Logs client connections and disconnections via WebSocket.
--   Automatically pings WebSocket clients to maintain connection.
+-   Automatically pings WebSocket clients to maintain the connection.
+-   Validates incoming requests using a secure `SEC_ID`.
 
 ## Prerequisites
 
-Make sure you have the following installed:
+Ensure you have the following installed:
 
 -   [Node.js](https://nodejs.org/) (v12 or later)
 -   npm (comes with Node.js)
--   [ngrok](https://ngrok.com/)
+-   Create a `.env` file in the project root with the following content:
+
+    ```plaintext
+    SEC_ID=your_secret_id_here
+    ```
 
 ## Installation
 
@@ -47,27 +51,27 @@ This will:
 
 -   Start an Express server to handle webhook POST requests.
 -   Set up a WebSocket server on port `8080` to broadcast incoming webhook data.
--   Create an ngrok tunnel to expose the webhook endpoint to the internet.
 
 ### 2. Access Information
 
 Once the server is running, the following information will be logged to the console:
 
--   The ngrok URL for sending TradingView webhooks (e.g., `http://<ngrok-url>/webhook`).
--   The WebSocket URL to connect clients (e.g., `ws://<ngrok-url>:8080`).
+-   The URL for sending TradingView webhooks (e.g., `http://<your-server-ip>:3000/webhook`).
+-   The WebSocket URL to connect clients (e.g., `ws://<your-server-ip>:8080`).
 
 ### 3. Sending Webhooks from TradingView
 
-To use this with TradingView, go to your TradingView account, set up an alert, and configure the webhook URL with the ngrok URL:
+To use this with TradingView, go to your TradingView account, set up an alert, and configure the webhook URL with your server's URL:
 
-```bash
-http://<ngrok-url>/webhook
+```plaintext
+http://<your-server-ip>:3000/webhook
 ```
 
-The TradingView alert payload should be in JSON format. Here is an example payload:
+The TradingView alert payload should be in JSON format. Here’s an example payload:
 
 ```json
 {
+	"SEC_ID": "your_secret_id_here",
 	"action": "buy",
 	"position": "long",
 	"price": 50000,
@@ -79,18 +83,29 @@ The TradingView alert payload should be in JSON format. Here is an example paylo
 
 WebSocket clients can connect to the WebSocket URL to receive real-time TradingView alert updates:
 
-```bash
-ws://<ngrok-url>:8080
+```plaintext
+ws://<your-server-ip>:8080
 ```
 
 ### 5. Log File
 
-Incoming webhook requests are logged in the `webhook_logs.json` file, located in the project root.
+Incoming webhook requests are logged in the console, providing detailed information for each request.
 
 ## File Structure
 
 -   `index.js`: The main server file containing the Express and WebSocket logic.
--   `webhook_logs.json`: Stores the logs of all webhook requests.
+-   `.env`: Environment file for secure variables (e.g., `SEC_ID`).
+
+## Code Overview
+
+The server uses the following libraries and functionality:
+
+-   **Express**: To handle HTTP requests.
+-   **WebSocket**: To broadcast alerts to connected clients.
+-   **dotenv**: To manage environment variables.
+-   **chalk**: To format console log messages for better readability.
+
+The server validates incoming webhook requests against the `SEC_ID` set in the `.env` file, ensuring that only authorized alerts are processed.
 
 ## License
 
