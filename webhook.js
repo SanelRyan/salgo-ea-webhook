@@ -19,7 +19,6 @@ const SUBSCRIBERS_FILE = "subscribers.json";
 const SUPPORTED_FILE = "supported.json";
 let subscribers = [];
 
-// Load subscribers from file
 const loadSubscribers = () => {
 	if (fs.existsSync(SUBSCRIBERS_FILE)) {
 		const data = fs.readFileSync(SUBSCRIBERS_FILE);
@@ -36,7 +35,6 @@ const loadSubscribers = () => {
 	}
 };
 
-// Save subscribers to file
 const saveSubscribers = () => {
 	fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
 };
@@ -61,7 +59,6 @@ bot.on("polling_error", (error) => {
 	console.error(`Polling error: ${error.message}`);
 });
 
-// Subscribe/unsubscribe to alerts via Telegram
 bot.onText(/\/alertme/, (msg) => {
 	const chatId = msg.chat.id;
 	if (!subscribers.includes(chatId)) {
@@ -75,7 +72,6 @@ bot.onText(/\/alertme/, (msg) => {
 	}
 });
 
-// Start message for the bot
 bot.onText(/\/start/, (msg) => {
 	const welcomeMessage = `👋 Welcome to ${BOT_NAME}! 
 
@@ -115,27 +111,6 @@ bot.onText(/\/supported/, (msg) => {
 	}
 });
 
-// Rate-limiting for Telegram bot messages
-const userRateLimit = {};
-const RATE_LIMIT_INTERVAL = 60 * 1000;
-
-bot.on("message", (msg) => {
-	const chatId = msg.chat.id;
-
-	if (!userRateLimit[chatId]) {
-		userRateLimit[chatId] = { lastRequestTime: 0 };
-	}
-
-	const currentTime = Date.now();
-	if (currentTime - userRateLimit[chatId].lastRequestTime < RATE_LIMIT_INTERVAL) {
-		bot.sendMessage(chatId, "⚠️ You're sending messages too quickly. Please wait a bit.");
-		return;
-	}
-
-	userRateLimit[chatId].lastRequestTime = currentTime;
-});
-
-// Send alert to Telegram subscribers
 const sendAlertToSubscribers = async (message) => {
 	if (subscribers.length === 0) {
 		console.log(colors.info("ℹ️ No subscribers to send alerts to."));
@@ -146,7 +121,6 @@ const sendAlertToSubscribers = async (message) => {
 	}
 };
 
-// WebSocket connection and ping-pong handling
 wss.on("connection", (ws) => {
 	console.log(colors.info("🤝 WebSocket client connected"));
 
@@ -171,7 +145,6 @@ const logRequest = (data) => {
 	console.log(JSON.stringify(data));
 };
 
-// Webhook for Trade Alerts - now `/alertWebhook`
 app.post("/alertWebhook", (req, res) => {
 	try {
 		const alertData = req.body;
@@ -187,7 +160,6 @@ app.post("/alertWebhook", (req, res) => {
 
 		sendAlertToSubscribers(message);
 
-		// Send data to WebSocket clients
 		logRequest(alertData);
 		wss.clients.forEach((client) => {
 			if (client.readyState === client.OPEN) {
@@ -203,7 +175,6 @@ app.post("/alertWebhook", (req, res) => {
 	}
 });
 
-// WebSocket webhook for secondary service
 app.post("/webhook", (req, res) => {
 	try {
 		const alertData = req.body;
@@ -242,7 +213,6 @@ const getPublicIPv4 = () => {
 	return null;
 };
 
-// Start the server
 const port = 3000;
 app.listen(port, () => {
 	console.log(colors.info(`🚀 Webhook server is running on port ${port}...`));
