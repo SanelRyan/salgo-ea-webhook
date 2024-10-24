@@ -213,7 +213,7 @@ const getPublicIPv4 = () => {
 	return null;
 };
 
-const port = 3000;
+const port = 80;
 app.listen(port, () => {
 	console.log(colors.info(`🚀 Webhook server is running on port ${port}...`));
 
